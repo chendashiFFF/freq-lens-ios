@@ -1,0 +1,20 @@
+.DS_Store
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcresult
+*.ipa
+*.mobileprovision
+build/
+.build/
+*.app/
+*.dSYM/
+*.zip
+*.p12
+*.p8
+*.cer
+.env
+.env.*
+# Local screenshots and real-account validation notes are not source deliverables.
+Preview/
+VALIDATION.md
