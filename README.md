@@ -1,111 +1,104 @@
+<p align="center">
+  <a href="FreqLens/Assets.xcassets/AppIcon.appiconset/AppIcon.png"><img src="FreqLens/Assets.xcassets/AppIcon.appiconset/AppIcon.png" width="88" alt="Freq Lens 图标"></a>
+</p>
+
 # Freq Lens
 
-面向 iOS 26 的原生 Freqtrade 数据查看中心。SwiftUI + Swift Charts，无第三方依赖，无 WebView。
+**在 iPhone 上查看你的 Freqtrade 数据。**
 
-当前版本 **1.2（4）**。构建、测试覆盖和已知验证边界见 [TESTING.md](TESTING.md)。
+用原生 SwiftUI 和 Swift Charts 构建的数据查看中心：收益、持仓、胜率、月历和交易历史，一处查看。暖深色背景、橙色重点数据、系统 Liquid Glass 导航，默认深色，也支持浅色与跟随系统。
 
-## 打开与运行
+**iOS 26+ · iPhone · SwiftUI · Swift Charts · 无第三方依赖**
 
-1. 使用 Xcode 26.2 或更高版本打开 `FreqLens.xcodeproj`。
-2. 选择 `FreqLens` scheme 和 iOS 26 模拟器，运行即可。
-3. 首次启动提供明确标记的演示数据。点击右上角服务器图标，填写 API 地址、用户名和密码。
-4. API 地址支持服务器根地址、`/api/v1` 和反向代理路径。例如 `https://example.com/bot`。
+当前版本 **1.3（5）**。这是独立客户端，需要连接你自己的 Freqtrade API；没有服务器时也可以直接体验内置演示数据。
 
-真机运行需要在 Signing & Capabilities 中选择自己的 Apple 开发团队。最低版本 iOS 26.0，仅面向 iPhone，不提供 Android 或旧版 iOS 支持。
+[安装与连接](docs/INSTALLATION.md) · [使用指南](docs/USER_GUIDE.md) · [全部截图](docs/SCREENSHOTS.md) · [更新记录](CHANGELOG.md)
+
+## 界面预览
+
+以下均为 **1.3 版在 iPhone 模拟器中的演示数据**，不含真实账户信息。点击图片可查看大图。
+
+<table>
+  <tr>
+    <th>资产与收益</th>
+    <th>当前持仓</th>
+    <th>区间分析</th>
+  </tr>
+  <tr>
+    <td><a href="docs/images/overview-dark.png"><img src="docs/images/overview-dark.png" width="260" alt="深色总览：资产、近 30 天收益曲线"></a></td>
+    <td><a href="docs/images/positions-dark.png"><img src="docs/images/positions-dark.png" width="260" alt="深色持仓：总收益、仓位与当前价格"></a></td>
+    <td><a href="docs/images/analytics-dark.png"><img src="docs/images/analytics-dark.png" width="260" alt="深色分析：胜率、盈利因子与单笔期望"></a></td>
+  </tr>
+  <tr>
+    <th>收益百分比</th>
+    <th>K 线读数</th>
+    <th>收益日历</th>
+  </tr>
+  <tr>
+    <td><a href="docs/images/profit-percent-dark.png"><img src="docs/images/profit-percent-dark.png" width="260" alt="首页收益图：百分比模式与拖动收益率读数"></a></td>
+    <td><a href="docs/images/candles-dark.png"><img src="docs/images/candles-dark.png" width="260" alt="K 线：拖动十字线读取开高低收"></a></td>
+    <td><a href="docs/images/calendar-dark.png"><img src="docs/images/calendar-dark.png" width="260" alt="日历：完整月份与上个月收益"></a></td>
+  </tr>
+</table>
+
+[查看浅色模式、收益曲线读数与历史清理预览 →](docs/SCREENSHOTS.md)
+
+## 可以做什么
+
+| 页面 | 内容 |
+| --- | --- |
+| 总览 | 机器人资产、累计盈亏、区间收益曲线、胜率与账户风险参考 |
+| 持仓 | 当前仓位、方向、杠杆、投入、价格、持仓时长和总收益 |
+| 分析 | 胜率、盈利因子、单笔期望、每日收益、月历和交易对表现 |
+| 历史 | 完整已平仓记录，按日期、交易对、编号及盈亏筛选 |
+| 交易详情 | 原生 K 线、拖动读数、入场与离场信息，以及服务器提供的止损和强平价格 |
+
+- **时间筛选**：默认近 30 天，支持今天、近 7 / 30 / 90 天、全部和自定义日期。总览、分析、历史共用选择。
+- **金额 / 百分比**：首页收益图支持账户币种与 `%` 切换，纵轴、合计与拖动读数同步更新，记住上次选择。
+- **直接读数**：单指拖动收益图或 K 线即可查看数值，收益图直接跟随上方日期区间。
+- **独立月历**：左右切换完整月份，点选日期查看当天收益和笔数。
+- **缓存与反馈**：后台计算并预先准备常用区间；未命中时显示进度，启动先恢复本机缓存再同步。
+- **多个服务器**：保存多个连接配置，在连接页切换；每个服务器独立缓存。
+- **历史清理**：按 1 / 3 / 6 / 12 个月以前或自定义截止日期，先预览，再确认删除已平仓历史。
+
+持仓与交易详情仅用于查看，没有平仓、加仓、撤单或机器人启停按钮。唯一的数据修改功能是手动确认后的历史清理：它会删除 **服务器中的已平仓交易记录**，影响历史统计，无法撤销。详见 [历史清理说明](docs/USER_GUIDE.md#历史清理)。
+
+## 快速开始
+
+1. 在 Mac 安装 **Xcode 26.2 或更高版本**。
+2. 克隆仓库，打开 `FreqLens.xcodeproj`。
+3. 选择 `FreqLens` scheme 和一个 iOS 26+ iPhone 模拟器，运行。
+4. 首次启动可浏览演示数据；点击右上角连接图标，填写自己的 API 地址、用户名和密码。
 
 ```bash
-xcodebuild -project FreqLens.xcodeproj -scheme FreqLens \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
-
-xcodebuild -project FreqLens.xcodeproj -scheme FreqLens \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
+git clone https://github.com/chendashiFFF/freq-lens-ios.git
+cd freq-lens-ios
+open FreqLens.xcodeproj
 ```
 
-模拟器也使用 Xcode 默认的临时签名；不要加 `CODE_SIGNING_ALLOWED=NO`，否则设备钥匙串可能返回缺少签名权限错误。
+真机安装还需要选择自己的 Apple 开发团队并完成签名。Windows 可以编辑源码或通过侧载工具安装有效签名的 IPA；SwiftUI 工程的编译仍需要 macOS + Xcode。仓库当前不提供 App Store / TestFlight 分发或通用签名安装包。
 
-## 页面
+[查看真机安装、Windows 使用方式与连接排错 →](docs/INSTALLATION.md)
 
-- **总览**：机器人资产、累计盈亏、可按日期筛选的已实现收益曲线、区间胜率、持仓总收益、最大回撤、策略状态。
-- **持仓**：只展示当前持仓，支持排序，显示方向、杠杆、持仓时长、投入金额、开仓均价与最新价格；没有交易操作按钮，也没有资产分布区域。
-- **交易详情**：Swift Charts 原生 K 线、直接拖动十字线查看 OHLC、入场与离场信息、止损和强平价格（服务器提供时）。K 线展示当前缓存行情，不冒充交易发生时的历史行情。
-- **分析**：区间胜率环图、盈利因子、单笔期望、平均盈利/亏损、可拖动每日收益柱图、收益日历、区间交易对排名；历史最大回撤与夏普单列为全历史参考。
-- **历史**：按平仓时间请求最新记录，支持交易对及交易编号搜索、盈利/亏损筛选、日期分组及详情查看。后台自动补齐全部交易，搜索和日期筛选作用于完整历史。
-- **清理历史**：历史页右上角垃圾桶入口，支持 1/3/6/12 个月以前或自定义日期。先读取完整历史并展示待删笔数、日期和记录，再确认删除；演示模式只允许预览。
-- **连接**：多个服务器配置、切换服务、重新认证、返回演示模式。
+## 文档
 
-采用系统 Liquid Glass 标签栏和工具栏，默认暖深色背景与橙色点缀，使用大数字和圆润卡片。顶部没有页面标题、英文标语或常驻连接状态。右上角外观菜单支持浅色、深色和跟随系统。1.2 首次运行迁移为深色，此后保留手动选择。支持 VoiceOver 标签和图表描述。
-
-## 数据口径
-
-| 内容 | 官方 API 字段或计算 |
+| 文档 | 内容 |
 | --- | --- |
-| 机器人资产 | `balance.total_bot`，旧服务未提供时使用 `balance.total` |
-| 累计盈亏 | `profit.profit_all_coin` / `profit_all_ratio` |
-| 区间已实现收益 | 完整历史中，平仓时间落入所选区间的 `close_profit_abs` 之和 |
-| 区间收益曲线与日历 | 将已平仓交易的总盈亏归属到 UTC 平仓日，再逐日汇总；曲线在区间起点从零累计 |
-| 持仓总收益 | 优先 `total_profit_abs` / `total_profit_ratio`，包含分批退出的已实现部分；旧服务回退 `profit_abs` / `profit_ratio` |
-| 已平仓交易收益 | `close_profit_abs` / `close_profit` |
-| 区间胜率 | 盈利笔数 / 全部区间已平仓笔数，持平交易计入分母，无交易显示 `—` |
-| 盈利因子 / 单笔期望 | 区间盈利总额 / 亏损绝对值；区间净收益 / 平仓笔数 |
-| 历史风险指标 | `/profit` 的全历史最大回撤与夏普比率，单独标注，不受日期筛选影响 |
-| 金额单位 | 服务端 `stake_currency`，不会将 USDT 标成美元 |
+| [安装与连接](docs/INSTALLATION.md) | 环境要求、模拟器、真机签名、Windows、API 连接与排错 |
+| [使用指南](docs/USER_GUIDE.md) | 页面操作、时间范围、图表、月历、历史清理 |
+| [数据与 API](docs/DATA_AND_API.md) | 指标口径、UTC 边界、接口、分页与兼容性 |
+| [架构与开发](docs/ARCHITECTURE.md) | 模块职责、数据流、统计缓存、并发与删除流程 |
+| [隐私与本地存储](docs/PRIVACY.md) | 密码、令牌、配置、缓存和网络传输 |
+| [界面截图](docs/SCREENSHOTS.md) | 深浅色画廊与截图更新方法 |
+| [测试记录](TESTING.md) | 43 项测试的覆盖、运行命令与验证边界 |
+| [参与开发](CONTRIBUTING.md) | 提交方式、修改约束与验证要求 |
+| [更新记录](CHANGELOG.md) | 1.0 至 1.2 的功能变化 |
 
-缺失数值显示 `—`，不转换成零；区间内存在缺失盈亏时，不绘制可能误导的收益曲线，不显示不完整胜率。只有盈利没有亏损时盈利因子为 `∞`。盈亏均保留正负号。每日图表与日历采用 UTC 日，交易时间采用设备时区。演示数据与真实数据不会混用。
+## 技术与参考
 
-## 时间筛选与图表操作
+界面使用 SwiftUI，图表使用 Apple Swift Charts，K 线由 `RuleMark` 和 `BarMark` 绘制。认证使用设备 Keychain，数据请求使用原生 URLSession；没有 WebView、外部图表 SDK 或额外包依赖。
 
-- **切换响应**：统计和图表数据在后台计算，页面读取已准备好的结果；常用区间在后台预先计算，重复切换直接使用内存缓存。缓存按实际 UTC 日期区间索引，历史变动、跨 UTC 日及切换服务器时失效；自定义范围的缓存数量有上限。
-- **加载反馈**：按钮立即切换选中态；未命中缓存时显示进度，并标注仍在展示的上一个区间。连续点选只提交最后一次选择的结果。筛选不发起网络请求。
-- **离线恢复**：按服务器保存完整数据快照，磁盘读取、编码和写入在后台执行；启动先显示本机数据，再同步服务器。同步中及失败时保留已有数据与状态提示。
-- **统一时间范围**：今天、近 7 天、近 30 天、近 90 天、全部、自定义。总览、分析、历史的区间统计共享选择，并在重启后保留。
-- **收益日历**：独立按完整月份查看，左右箭头切月，可回看最早交易所在月份。日历切月不改变上方统计区间；月份统计同样在后台计算并缓存。
-- **日期边界**：使用 UTC 日，开始日和结束日均包含；内部为开始日 00:00 至结束日次日 00:00 的半开区间。以平仓时间归属交易，含该交易已实现的分批退出盈亏。
-- **实时数据**：当前资产、当前持仓、账户累计盈亏仍是实时/全历史口径，区间筛选仅影响标为区间的已平仓统计。
-- **直接读数**：图表默认支持单指拖动十字线，收益图显示日期与金额，K 线显示时间及开、高、低、收。无需切换“浏览/读数”模式。
-- **单一时间范围**：收益图直接展示上方日期筛选覆盖的完整区间，移除图表内部重复的“全部/7天/30天”窗口菜单。拖动只查看数值，不移动或更改统计范围。
-- **K 线数据**：请求服务器最近最多 240 根，实际数量取决于服务器缓存；图表展示已加载的行情，可直接拖动读取每根 K 线。
+- [Freqtrade](https://github.com/freqtrade/freqtrade) · [FreqUI](https://github.com/freqtrade/frequi)
+- [Swift Charts](https://developer.apple.com/documentation/charts) · [Liquid Glass](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views)
 
-## 连接与隐私
-
-- 常规数据查询使用枚举白名单与 **GET**：`show_config`、`profit`、`balance`、`status`、`performance`、`daily`、`trades`、`pair_candles`。
-- 认证使用 **POST**：`token/login`、`token/refresh`。客户端没有平仓、加仓、机器人启停或配置修改的实现。
-- 唯一的数据修改功能是用户确认后的历史清理：每笔先 **GET** `trade/{id}`，核对交易身份、原平仓时间、已平仓状态、早于截止日期且所有委托均已结束，再 **DELETE** `trades/{id}`。
-- 删除会移除服务器数据库记录并影响收益与胜率统计，无法撤销。逐笔执行，遇到任何错误停止后续请求，并显示已确认数量；可以停止剩余批次。超时或网关错误不会自动重试 DELETE；明确的 401 拒绝可以续期，但必须重新核对交易。
-- 首次删除前清除旧的本机快照，批次结束重新读取完整统计。同步失败时不展示可能包含已删记录的旧缓存；若无法清理本机缓存，不执行服务器删除。
-- 密码仅在连接时使用，不写入磁盘、日志或工程。访问令牌和刷新令牌存入设备钥匙串，使用 `WhenUnlockedThisDeviceOnly`。
-- 401 触发共享的令牌刷新任务，防止多个并行请求重复续期；502/503/504 的 GET 最多重试两次。
-- 使用临时 URLSession，拒绝 HTTP 重定向，保留系统 TLS 校验，不信任任意证书。
-- 为兼容自行部署的 HTTP Freqtrade API，Info.plist 允许 HTTP。HTTP 连接不具备传输加密；可直接在连接页填写 HTTPS 地址。
-- 每个服务器单独保存文件保护的本地缓存，离线明确显示缓存状态与更新时间；切换服务器先清空旧视图状态与统计缓存。
-- 活跃前台每 30 秒刷新，可下拉刷新；后台停止轮询。完整数据请求成功才提交新快照，失败保留上一快照并提示。
-- 自动刷新按每页最多 500 笔读取全部已平仓历史。校验总数、分页偏移和唯一编号；多页读取后再校验最新记录。数据变动时重试一次，读取不完整时不发布区间统计。
-
-资产隐藏按钮用于临时遮挡金额，并非设备级隐私锁。
-
-## 目录
-
-```text
-FreqLens/Core/       API、模型、Keychain、后台统计、缓存与历史清理
-FreqLens/Design/     颜色、格式、卡片与公共组件
-FreqLens/Views/      四个页面、图表、月历、历史清理、详情与连接
-FreqLensTests/       数据口径、解析、分页、认证、缓存与删除保护测试
-FreqLensUITests/     导航、日期筛选、图表读数、日历和清理预览
-```
-
-## 图表与设计选型
-
-调研了 Apple Swift Charts 与开源 DGCharts。由于只面向 iOS 26，选择原生 Swift Charts：直接配合 SwiftUI、支持拖动读数、系统辅助功能与深色外观，且无需额外依赖。K 线由 RuleMark 和 BarMark 绘制。
-
-- [Swift Charts 官方文档](https://developer.apple.com/documentation/charts)
-- [Liquid Glass 官方文档](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views)
-- [DGCharts（调研参考，未引入）](https://github.com/ChartsOrg/Charts)
-- [Freqtrade 官方仓库](https://github.com/freqtrade/freqtrade)
-- [FreqUI 官方仓库](https://github.com/freqtrade/frequi)
-
-Freq Lens 是独立原生客户端。下载的 Freqtrade / FreqUI 仓库保留在旁边用于核对接口，不把 Web 前端打包进 App。
-
-## Windows 与手机安装
-
-完整 SwiftUI 工程需要 macOS + Xcode 编译。Windows 可编辑源码，但不能直接运行 Apple 的 iOS SDK；可以使用实体 Mac、云 Mac 或 macOS CI 生成 IPA，再通过 TestFlight 或支持 Windows 的 iOS 侧载工具安装。
-
-侧载仍需有效 Apple 签名，个人开发签名通常只有 7 天有效期。提供的开发版 IPA 只用于本人设备测试，内置签名只覆盖已注册的设备；更换设备或签名到期需要重新签名。
+Freq Lens 是独立项目，与 Freqtrade / FreqUI 无官方隶属关系。仓库只包含原生客户端，不包含机器人后端或交易策略。
