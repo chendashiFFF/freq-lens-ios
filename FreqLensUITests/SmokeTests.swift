@@ -137,6 +137,44 @@ final class SmokeTests: XCTestCase {
         add(attachment)
     }
 
+    func testOverviewPercentSwitchReadoutAndPersistence() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--demo", "-appearance", "dark"]
+        app.launch()
+        let value = app.staticTexts["profitChartValue"]
+        XCTAssertTrue(value.waitForExistence(timeout: 5))
+        app.buttons["profitUnit-amount"].tap()
+        XCTAssertEqual(value.label, "+2,393.43")
+        let interval = app.staticTexts["profitViewport"].label
+        app.buttons["profitUnit-percent"].tap()
+        XCTAssertEqual(value.label, "+9.57%")
+        XCTAssertEqual(app.staticTexts["profitViewport"].label, interval)
+        XCTAssertTrue(app.staticTexts["profitReturnBasis"].exists)
+        let chart = app.descendants(matching: .any).matching(identifier: "profitChart").firstMatch
+        chart.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))
+            .press(forDuration: 0.2, thenDragTo: chart.coordinate(withNormalizedOffset: CGVector(dx: 0.68, dy: 0.5)))
+        XCTAssertTrue(value.label.hasSuffix("%"))
+        XCTAssertNotEqual(value.label, "+9.57%")
+        XCTAssertTrue(app.staticTexts["profitReadout"].label.contains("累计收益率"))
+        let percentReadout = value.label
+        app.buttons["profitUnit-amount"].tap()
+        XCTAssertFalse(value.label.hasSuffix("%"))
+        app.buttons["profitUnit-percent"].tap()
+        XCTAssertEqual(value.label, percentReadout)
+        capture(app, "14-profit-percent-readout")
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(value.waitForExistence(timeout: 5))
+        XCTAssertEqual(value.label, "+9.57%")
+        app.buttons["range-week"].tap()
+        XCTAssertEqual(value.label, "+2.04%")
+        app.buttons["隐藏金额"].tap()
+        XCTAssertEqual(value.label, "••••")
+        app.buttons["显示金额"].tap()
+        app.buttons["range-month"].tap()
+        app.buttons["profitUnit-amount"].tap()
+    }
+
     func testCandleChartReadsDirectlyInDarkMode() {
         let app = XCUIApplication()
         app.launchArguments = ["--demo", "--tab", "1"]

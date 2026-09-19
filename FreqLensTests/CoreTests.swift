@@ -3,6 +3,29 @@ import Synchronization
 @testable import FreqLens
 
 final class CoreTests: XCTestCase {
+    func testReturnUsesStartingCapitalAcrossSelectedPeriodsAndDrawdowns() throws {
+        let data = DemoData.snapshot(now: UTCDate.parse("2026-09-20")!)
+        let report = PeriodReport(trades: data.history.trades, filter: TradeTimeFilter(preset: .month), now: data.fetchedAt)
+        let ratio = try XCTUnwrap(Metrics.returnRatio(profit: report.profit, startingCapital: data.wallet.startingCapital))
+        XCTAssertEqual(ratio, 0.0957372, accuracy: 0.0000001)
+        XCTAssertNotEqual(ratio, data.profit.profitAllRatio)
+        let days = [DailyProfit(date: "2026-09-01", absProfit: 100, tradeCount: 1),
+                    DailyProfit(date: "2026-09-02", absProfit: -150, tradeCount: 1)]
+        let returns = Metrics.curve(days, limit: 2).compactMap { Metrics.returnRatio(profit: $0.value, startingCapital: 1_000) }
+        XCTAssertEqual(returns, [0, 0.1, -0.05])
+        XCTAssertEqual(Metrics.returnRatio(profit: 0, startingCapital: 1_000), 0)
+    }
+
+    func testUnavailableOrInvalidCapitalNeverProducesAnEstimatedReturn() {
+        for capital: Double? in [nil, 0, -1, .nan, .infinity] {
+            XCTAssertNil(Metrics.returnRatio(profit: 100, startingCapital: capital))
+        }
+        for profit: Double? in [nil, .nan, .infinity] {
+            XCTAssertNil(Metrics.returnRatio(profit: profit, startingCapital: 1_000))
+        }
+        XCTAssertNil(Metrics.returnRatio(profit: .greatestFiniteMagnitude, startingCapital: .leastNonzeroMagnitude))
+    }
+
     func testAddressNormalizationAndRejection() throws {
         XCTAssertEqual(try APIAddress.normalize(" http://localhost:8080/ ").absoluteString, "http://localhost:8080/api/v1")
         XCTAssertEqual(try APIAddress.normalize("https://example.com/bot/api/v1/").absoluteString, "https://example.com/bot/api/v1")
