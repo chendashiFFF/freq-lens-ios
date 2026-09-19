@@ -7,8 +7,31 @@ struct InteractiveProfitChart: View {
     var points: [CurvePoint]
     var currency: String
     var kind: Kind = .cumulative
+    var startingCapital: Double? = nil
     @Environment(LensStore.self) private var store
     @State private var selectedDate: Date?
+    @AppStorage("overviewProfitPercent") private var prefersPercent = false
+
+    private var supportsPercent: Bool {
+        Metrics.returnRatio(profit: total, startingCapital: startingCapital) != nil &&
+        points.allSatisfy { Metrics.returnRatio(profit: $0.value, startingCapital: startingCapital) != nil }
+    }
+    private var showsPercent: Bool { kind == .cumulative && prefersPercent && supportsPercent }
+    private var displayedPoints: [CurvePoint] {
+        guard showsPercent else { return points }
+        return points.compactMap { point in
+            Metrics.returnRatio(profit: point.value, startingCapital: startingCapital)
+                .map { CurvePoint(date: point.date, value: $0 * 100) }
+        }
+    }
+    private var headlineValue: Double? {
+        let amount = selected?.value ?? total
+        return showsPercent ? Metrics.returnRatio(profit: amount, startingCapital: startingCapital).map { $0 * 100 } : amount
+    }
+    private func formatted(_ value: Double?, signed: Bool = false) -> String {
+        guard let value else { return "—" }
+        return Fmt.number(value, signed: signed) + (showsPercent ? "%" : "")
+    }
 
     private var selected: CurvePoint? {
         selectedDate.flatMap { date in points.min { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) } }
@@ -21,8 +44,8 @@ struct InteractiveProfitChart: View {
     private var rangeKey: String { "\(days.first?.date ?? "")/\(days.last?.date ?? "")" }
     private var total: Double { days.reduce(0) { $0 + $1.absProfit } }
     private var yDomain: ClosedRange<Double> {
-        let low = min(0, points.map(\.value).min() ?? 0)
-        let high = max(0, points.map(\.value).max() ?? 0)
+        let low = min(0, displayedPoints.map(\.value).min() ?? 0)
+        let high = max(0, displayedPoints.map(\.value).max() ?? 0)
         let pad = max((high - low) * 0.12, 0.01)
         return (low < 0 ? low - pad : 0)...(high + pad)
     }
@@ -32,14 +55,24 @@ struct InteractiveProfitChart: View {
         LensCard {
             VStack(alignment: .leading, spacing: 15) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(kind == .cumulative ? "累计收益" : "每日收益").font(.system(size: 14, weight: .medium)).foregroundStyle(LensTheme.muted)
+                    Text(kind == .cumulative ? (showsPercent ? "累计收益率" : "累计收益") : "每日收益")
+                        .font(.system(size: 14, weight: .medium)).foregroundStyle(LensTheme.muted)
                     Spacer()
-                    Text(currency).font(.system(size: 10, design: .monospaced)).foregroundStyle(LensTheme.muted)
+                    if kind == .cumulative {
+                        HStack(spacing: 2) {
+                            unitButton(currency, percent: false)
+                            unitButton("%", percent: true)
+                        }.padding(3).background(LensTheme.background, in: Capsule())
+                    } else {
+                        Text(currency).font(.system(size: 10, design: .monospaced)).foregroundStyle(LensTheme.muted)
+                    }
                 }
                 HStack(alignment: .firstTextBaseline) {
-                    Text(store.privacyMode ? "••••" : Fmt.number(selected?.value ?? total, signed: true))
+                    Text(store.privacyMode ? "••••" : formatted(headlineValue, signed: true))
                         .font(.system(size: 38, weight: .bold, design: .rounded)).monospacedDigit()
+                        .lineLimit(1).minimumScaleFactor(0.65)
                         .foregroundStyle((selected?.value ?? total) < 0 ? LensTheme.loss : LensTheme.tint)
+                        .accessibilityIdentifier(kind == .cumulative ? "profitChartValue" : "dailyChartValue")
                     Spacer()
                     Text(readout).font(.system(size: 10)).foregroundStyle(LensTheme.muted)
                         .accessibilityIdentifier(kind == .cumulative ? "profitReadout" : "dailyReadout")
@@ -57,18 +90,36 @@ struct InteractiveProfitChart: View {
                         .opacity(store.privacyMode ? 0 : 1).accessibilityHidden(store.privacyMode)
                         .overlay { if store.privacyMode { Text("金额已隐藏").font(.caption).foregroundStyle(LensTheme.muted) } }
                 }
-                Text("\(days.first?.date ?? "—") — \(days.last?.date ?? "—")")
-                    .font(.system(size: 9, design: .monospaced)).foregroundStyle(LensTheme.muted)
-                    .accessibilityIdentifier(kind == .cumulative ? "profitViewport" : "dailyViewport")
+                HStack {
+                    Text("\(days.first?.date ?? "—") — \(days.last?.date ?? "—")")
+                        .accessibilityIdentifier(kind == .cumulative ? "profitViewport" : "dailyViewport")
+                    Spacer(minLength: 4)
+                    if showsPercent { Text("相对初始资金").accessibilityIdentifier("profitReturnBasis") }
+                }.font(.system(size: 9, design: .monospaced)).foregroundStyle(LensTheme.muted)
             }
         }
         .onChange(of: rangeKey) { _, _ in selectedDate = nil }
     }
 
+    private func unitButton(_ title: String, percent: Bool) -> some View {
+        Button { prefersPercent = percent } label: {
+            Text(title).font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundStyle(showsPercent == percent ? LensTheme.background : LensTheme.muted)
+                .padding(.horizontal, 11).frame(minHeight: 32)
+                .background(showsPercent == percent ? LensTheme.tint : .clear, in: Capsule())
+        }.buttonStyle(.plain)
+            .disabled(percent && !supportsPercent)
+            .opacity(percent && !supportsPercent ? 0.4 : 1)
+            .accessibilityLabel(percent ? "收益百分比" : "收益金额 \(currency)")
+            .accessibilityValue(showsPercent == percent ? "已选择" : "未选择")
+            .accessibilityHint(percent ? (supportsPercent ? "相对机器人初始资金" : "服务器未提供有效初始资金") : "以账户币种显示")
+            .accessibilityIdentifier(percent ? "profitUnit-percent" : "profitUnit-amount")
+    }
+
     private var readout: String {
         guard let selected else { return "区间合计" }
         let count = days.first { $0.day == selected.date }?.tradeCount ?? 0
-        return "\(UTCDate.string(selected.date))\n\(kind == .cumulative ? "累计收益" : "\(count) 笔平仓")"
+        return "\(UTCDate.string(selected.date))\n\(kind == .cumulative ? (showsPercent ? "累计收益率" : "累计收益") : "\(count) 笔平仓")"
     }
 
     private var baseChart: some View {
@@ -84,14 +135,19 @@ struct InteractiveProfitChart: View {
             .chartYAxis {
                 AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { value in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [3, 4])).foregroundStyle(LensTheme.grid)
-                    AxisValueLabel { if let number = value.as(Double.self) { Text(Fmt.compact(number)).font(.system(size: 9)).foregroundStyle(LensTheme.muted) } }
+                    AxisValueLabel {
+                        if let number = value.as(Double.self) {
+                            Text(showsPercent ? Fmt.number(number) + "%" : Fmt.compact(number))
+                                .font(.system(size: 9)).foregroundStyle(LensTheme.muted)
+                        }
+                    }
                 }
             }
     }
 
     @ChartContentBuilder private var marks: some ChartContent {
         if kind == .cumulative {
-            ForEach(points) { point in
+            ForEach(displayedPoints) { point in
                 AreaMark(x: .value("日期", point.date), yStart: .value("基线", 0), yEnd: .value("累计收益", point.value))
                     .foregroundStyle(LinearGradient(colors: [tint.opacity(0.22), tint.opacity(0.02)], startPoint: .top, endPoint: .bottom))
                 LineMark(x: .value("日期", point.date), y: .value("累计收益", point.value))
@@ -107,7 +163,7 @@ struct InteractiveProfitChart: View {
         if let selected {
             RuleMark(x: .value("所选日期", selected.date)).foregroundStyle(LensTheme.muted)
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-            PointMark(x: .value("日期", selected.date), y: .value("收益", selected.value))
+            PointMark(x: .value("日期", selected.date), y: .value("收益", headlineValue ?? 0))
                 .foregroundStyle(LensTheme.pnl(selected.value)).symbolSize(45)
         }
     }

@@ -130,6 +130,14 @@ struct CurvePoint: Identifiable, Sendable {
 }
 
 enum Metrics {
+    /// Return against the server's starting capital, never a sum of individual trade returns.
+    static func returnRatio(profit: Double?, startingCapital: Double?) -> Double? {
+        guard let profit, profit.isFinite, let startingCapital,
+              startingCapital.isFinite, startingCapital > 0 else { return nil }
+        let ratio = profit / startingCapital
+        return ratio.isFinite && (ratio * 100).isFinite ? ratio : nil
+    }
+
     /// Daily values are realized P&L in the stake currency, never account equity.
     static func curve(_ days: [DailyProfit], limit: Int) -> [CurvePoint] {
         let sorted = days.filter { DailyProfit.parseDay($0.date) != nil }.sorted { $0.date < $1.date }.suffix(limit)
