@@ -2,7 +2,19 @@
 
 [返回首页](../README.md) · [使用指南](USER_GUIDE.md)
 
-以下截图来自 **Freq Lens 1.3（5）**，于 2026-09-20 在 iPhone 17 Pro / iOS 26.3.1 模拟器中运行 App 截取。所有金额、仓位、交易和收益均为内置演示数据。图片仅缩放至 720 px 宽并压缩，未修改界面内容。
+以下截图来自 **Freq Lens 1.4（7）**，于 2026-11-10 在 iPhone 17 Pro / iOS 26.3.1 模拟器中运行 App 截取。所有金额、仓位、交易和收益均为内置演示数据。图片仅缩放至 720 px 宽并压缩，未修改界面内容。
+
+## 收益估算
+
+<table>
+  <tr><th>深色</th><th>浅色</th></tr>
+  <tr>
+    <td><a href="images/outlook-dark.png"><img src="images/outlook-dark.png" width="330" alt="深色收益图：实线为已平仓，虚线为含持仓现价估值，下方展示月化和年化参考"></a></td>
+    <td><a href="images/outlook-light.png"><img src="images/outlook-light.png" width="330" alt="浅色收益图：暖白背景，月化和年化数据及持仓估值读数"></a></td>
+  </tr>
+</table>
+
+月化和年化基于所选区间的已平仓收益做单利折算；右侧“现价”列用于当前持仓估值，不是未来日期。图中的百分比不是收益承诺，详见[计算口径](DATA_AND_API.md)。
 
 ## 四个页面
 
@@ -30,7 +42,7 @@
   <tr><th>K 线读数</th><th>完整月份</th></tr>
   <tr>
     <td><a href="images/candles-dark.png"><img src="images/candles-dark.png" width="260" alt="拖动 K 线十字线后显示选中行情的开高低收"></a></td>
-    <td><a href="images/calendar-dark.png"><img src="images/calendar-dark.png" width="260" alt="切换到上个月，显示完整八月的星期排列与月度合计"></a></td>
+    <td><a href="images/calendar-dark.png"><img src="images/calendar-dark.png" width="260" alt="切换到上个月，显示完整上月的星期排列与月度合计"></a></td>
   </tr>
 </table>
 
@@ -71,6 +83,9 @@ xcrun xcresulttool export attachments \
 
 | 图片 | 对应测试附件 |
 | --- | --- |
+| `outlook-dark.png` | `15-outlook-dark` |
+| `outlook-light.png` | `16-outlook-light` |
+| `daily-profit-dark.png` | `17-daily-profit` |
 | `overview-dark.png` | `01-overview` |
 | `positions-dark.png` | `02-positions` |
 | `analytics-dark.png` | `04-analytics` |
@@ -81,6 +96,10 @@ xcrun xcresulttool export attachments \
 | `analytics-light.png` | `11-warm-analytics` |
 | `calendar-dark.png` | `12-previous-month-calendar` |
 | `cleanup-preview-dark.png` | `13-deletion-preview-demo` |
+
+每日收益柱图也保留拖动读数：
+
+<a href="images/daily-profit-dark.png"><img src="images/daily-profit-dark.png" width="330" alt="每日收益柱图，按选中日期显示已平仓收益和笔数"></a>
 
 ### 手动补图
 

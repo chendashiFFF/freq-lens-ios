@@ -13,6 +13,7 @@ FreqLens/
 │   ├── APIClient.swift        URL、接口、认证、Keychain、网络与完整分页
 │   ├── Models.swift           服务端模型、行情列解析与基础计算
 │   ├── PeriodReport.swift     UTC 日期、筛选范围、区间统计和图表坐标
+│   ├── ProfitOutlook.swift    单利折算、观测期和当前持仓估值边界
 │   ├── SnapshotCache.swift    磁盘缓存 actor 与后台 ReportWorker
 │   ├── LensStore.swift        主状态、服务器切换、报告缓存与删除编排
 │   ├── HistoryDeletion.swift  删除预览、状态校验与结果模型
@@ -101,3 +102,7 @@ xcodebuild -project FreqLens.xcodeproj -scheme FreqLens \
 ```
 
 UI 测试使用 `--demo`；`--tab 0/1/2/3` 可选初始页，`-appearance dark` / `-appearance light` 可用于截图。演示启动不需要任何 API 凭据，截图方法见 [截图文档](SCREENSHOTS.md#更新截图)。
+
+## 估值图层
+
+`PeriodReport` 生成观测 UTC 天数与区间是否覆盖当前日；`ProfitOutlook` 在完整报告基础上计算月化 / 年化，并独立核对当前持仓估值。图表用历史点索引保持每日间距，在最右侧增加明确标为“现价”的估值列；这段横向宽度不映射未来日期。实线、虚线使用不同序列，估值纳入纵轴范围，金额与百分比复用同一数据基准。

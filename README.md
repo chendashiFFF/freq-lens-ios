@@ -10,13 +10,13 @@
 
 **iOS 26+ · iPhone · SwiftUI · Swift Charts · 无第三方依赖**
 
-当前版本 **1.3（5）**。这是独立客户端，需要连接你自己的 Freqtrade API；没有服务器时也可以直接体验内置演示数据。
+当前版本 **1.4（7）**。这是独立客户端，需要连接你自己的 Freqtrade API；没有服务器时也可以直接体验内置演示数据。
 
 [安装与连接](docs/INSTALLATION.md) · [使用指南](docs/USER_GUIDE.md) · [全部截图](docs/SCREENSHOTS.md) · [更新记录](CHANGELOG.md)
 
 ## 界面预览
 
-以下均为 **1.3 版在 iPhone 模拟器中的演示数据**，不含真实账户信息。点击图片可查看大图。
+以下均为 **iPhone 模拟器中的演示数据**，收益估算截图已更新至 1.4，不含真实账户信息。点击图片可查看大图。
 
 <table>
   <tr>
@@ -30,12 +30,12 @@
     <td><a href="docs/images/analytics-dark.png"><img src="docs/images/analytics-dark.png" width="260" alt="深色分析：胜率、盈利因子与单笔期望"></a></td>
   </tr>
   <tr>
-    <th>收益百分比</th>
+    <th>月化、年化与持仓估值</th>
     <th>K 线读数</th>
     <th>收益日历</th>
   </tr>
   <tr>
-    <td><a href="docs/images/profit-percent-dark.png"><img src="docs/images/profit-percent-dark.png" width="260" alt="首页收益图：百分比模式与拖动收益率读数"></a></td>
+    <td><a href="docs/images/outlook-dark.png"><img src="docs/images/outlook-dark.png" width="260" alt="已实现实线、持仓估值虚线，以及月化和年化参考"></a></td>
     <td><a href="docs/images/candles-dark.png"><img src="docs/images/candles-dark.png" width="260" alt="K 线：拖动十字线读取开高低收"></a></td>
     <td><a href="docs/images/calendar-dark.png"><img src="docs/images/calendar-dark.png" width="260" alt="日历：完整月份与上个月收益"></a></td>
   </tr>
@@ -54,6 +54,8 @@
 | 交易详情 | 原生 K 线、拖动读数、入场与离场信息，以及服务器提供的止损和强平价格 |
 
 - **时间筛选**：默认近 30 天，支持今天、近 7 / 30 / 90 天、全部和自定义日期。总览、分析、历史共用选择。
+- **月化 / 年化**：基于所选区间已平仓收益做单利折算，并显示观测天数与计算口径。
+- **实线 / 虚线**：实线表示已平仓收益，虚线补上当前持仓估值；右侧“现价”是独立估值列，不代表未来日期。
 - **金额 / 百分比**：首页收益图支持账户币种与 `%` 切换，纵轴、合计与拖动读数同步更新，记住上次选择。
 - **直接读数**：单指拖动收益图或 K 线即可查看数值，收益图直接跟随上方日期区间。
 - **独立月历**：左右切换完整月份，点选日期查看当天收益和笔数。
@@ -90,9 +92,9 @@ open FreqLens.xcodeproj
 | [架构与开发](docs/ARCHITECTURE.md) | 模块职责、数据流、统计缓存、并发与删除流程 |
 | [隐私与本地存储](docs/PRIVACY.md) | 密码、令牌、配置、缓存和网络传输 |
 | [界面截图](docs/SCREENSHOTS.md) | 深浅色画廊与截图更新方法 |
-| [测试记录](TESTING.md) | 43 项测试的覆盖、运行命令与验证边界 |
+| [测试记录](TESTING.md) | 测试覆盖、运行命令与验证边界 |
 | [参与开发](CONTRIBUTING.md) | 提交方式、修改约束与验证要求 |
-| [更新记录](CHANGELOG.md) | 1.0 至 1.2 的功能变化 |
+| [更新记录](CHANGELOG.md) | 各版本的功能变化 |
 
 ## 技术与参考
 
