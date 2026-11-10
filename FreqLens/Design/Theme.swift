@@ -219,6 +219,7 @@ struct AppearanceMenu: View {
             }
         } label: {
             Image(systemName: appearance == "dark" ? "moon.fill" : "circle.lefthalf.filled")
-        }.accessibilityLabel("外观设置").accessibilityIdentifier("appearanceButton")
+        }.accessibilityLabel("外观设置").accessibilityValue(AppAppearance(rawValue: appearance)?.title ?? "跟随系统")
+            .accessibilityIdentifier("appearanceButton")
     }
 }

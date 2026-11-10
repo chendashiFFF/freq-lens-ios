@@ -15,8 +15,9 @@ struct OverviewView: View {
                     TimeFilterView()
                     ReportAvailability()
                     if let report = store.report {
-                        InteractiveProfitChart(days: report.daily, points: report.cumulativePoints,
-                                               currency: data.config.stakeCurrency, startingCapital: data.wallet.startingCapital)
+                        InteractiveProfitChart(days: report.daily, points: report.cumulativePoints.filter { $0.date <= UTCDate.calendar.startOfDay(for: data.fetchedAt) },
+                                               currency: data.config.stakeCurrency, startingCapital: data.wallet.startingCapital,
+                                               outlook: store.isComputingReport ? nil : ProfitOutlook(report: report, snapshot: data, isCached: store.isStale))
                     }
                     LazyVGrid(columns: grid, spacing: 12) {
                         MetricTile(title: "净收益", value: hidden(Fmt.number(store.report?.profit)),
