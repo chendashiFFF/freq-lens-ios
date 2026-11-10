@@ -95,6 +95,9 @@ struct PeriodReport: Sendable {
     var averageDuration: TimeInterval?
     var cumulativePoints: [CurvePoint]
     var dailyPoints: [CurvePoint]
+    let referenceDay: Date
+    let observationDays: Int
+    let includesReferenceDay: Bool
     var count: Int { trades.count }
 
     init(trades allTrades: [Trade], filter: TradeTimeFilter, now: Date = Date()) {
@@ -125,6 +128,15 @@ struct PeriodReport: Sendable {
         let grouped = Dictionary(grouping: trades) { UTCDate.string($0.closedAt!) }
         let start = interval?.start ?? calendar.startOfDay(for: trades.last?.closedAt ?? now)
         let finish = interval?.end ?? calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))!
+        referenceDay = calendar.startOfDay(for: now)
+        includesReferenceDay = start <= referenceDay && finish > referenceDay
+        // Count observed UTC calendar days, never future days or time preceding
+        // the earliest retained trade. The current, incomplete day counts once.
+        let firstKnown = allTrades.filter { !$0.isOpen && $0.closedAt != nil }
+            .map(\.openedAt).filter { $0 <= now }.min().map { calendar.startOfDay(for: $0) }
+        let observationStart = max(start, firstKnown ?? start)
+        let observationEnd = min(finish, calendar.date(byAdding: .day, value: 1, to: referenceDay)!)
+        observationDays = max(0, calendar.dateComponents([.day], from: observationStart, to: observationEnd).day ?? 0)
         var date = start
         daily = []
         while date < finish {
