@@ -54,6 +54,9 @@ final class LensStore {
     @ObservationIgnored private let clientFactory: @Sendable (ServerProfile, Tokens) -> FreqtradeClient
 
     var isDemo: Bool { activeID == nil }
+    /// A missing or rejected token should take the user straight to re-authentication
+    /// while retaining the cached snapshot behind the connection sheet.
+    var needsAuthentication: Bool { !isDemo && client == nil }
     var activeProfile: ServerProfile? { profiles.first { $0.id == activeID } }
     var canLoadHistory: Bool {
         !isDemo && !paginationEnded && nextHistoryOffset < (snapshot?.history.totalTrades ?? 0)
@@ -78,7 +81,7 @@ final class LensStore {
            let id = UUID(uuidString: saved), let profile = profiles.first(where: { $0.id == id }) {
             activeID = id
             if let tokens = TokenVault.read(id) { client = clientFactory(profile, tokens) }
-            else { errorMessage = "登录信息已失效，请重新连接服务器。" }
+            else { errorMessage = "登录令牌不可用，请重新输入密码连接服务器。" }
         } else { snapshot = DemoData.snapshot() }
         if let activeID { restoreCache(activeID) }
         else { updateReport(invalidate: true) }
@@ -89,12 +92,12 @@ final class LensStore {
         guard !Task.isCancelled else { return }
         guard !isRefreshing, !isLoadingHistory, !isDeletingHistory else { return }
         if isDemo { snapshot = DemoData.snapshot(); return }
-        guard let client else { return }
+        guard let activeClient = client else { return }
         let revision = generation
         isRefreshing = true
         defer { if revision == generation { isRefreshing = false } }
         do {
-            let fresh = try await client.snapshot()
+            let fresh = try await activeClient.snapshot()
             guard revision == generation, !Task.isCancelled else { return }
             // Reload the loaded window so server-side removals or old positions closing
             // cannot leave ghost rows or cause offset pagination to skip trades.
@@ -104,6 +107,14 @@ final class LensStore {
             isCached = false
             errorMessage = nil
             if let activeID { await diskCache.write(fresh, id: activeID) }
+        } catch let error as LensError {
+            guard revision == generation, !Task.isCancelled else { return }
+            if case .authentication = error {
+                client = nil
+                errorMessage = "登录令牌已失效，请重新输入密码连接服务器。"
+            } else {
+                errorMessage = error.localizedDescription
+            }
         } catch {
             guard revision == generation, !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
@@ -172,7 +183,7 @@ final class LensStore {
             nextHistoryOffset = 0
             restoreCache(profile.id)
             if let tokens = TokenVault.read(profile.id) { client = clientFactory(profile, tokens) }
-            else { client = nil; errorMessage = "登录信息已失效，请重新连接服务器。" }
+            else { client = nil; errorMessage = "登录令牌不可用，请重新输入密码连接服务器。" }
         } else {
             client = nil
             snapshot = DemoData.snapshot()

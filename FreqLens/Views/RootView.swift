@@ -34,6 +34,10 @@ struct RootView: View {
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
             if let i = args.firstIndex(of: "--tab"), args.indices.contains(i + 1) { selection = Int(args[i + 1]) ?? 0 }
+            if store.needsAuthentication { showConnection = true }
+        }
+        .onChange(of: store.needsAuthentication) { _, needsAuthentication in
+            if needsAuthentication { showConnection = true }
         }
     }
 }

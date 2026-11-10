@@ -45,6 +45,10 @@ struct ConnectionView: View {
                     LensCard {
                         VStack(alignment: .leading, spacing: 20) {
                             SectionHeading(title: "服务器连接")
+                            if store.needsAuthentication {
+                                Label("登录令牌不可用，请重新输入密码", systemImage: "key.slash")
+                                    .font(.caption).foregroundStyle(LensTheme.tint)
+                            }
                             input("名称（可选）") {
                                 TextField("我的 Freqtrade", text: $name).focused($focus, equals: .name).accessibilityIdentifier("serverName")
                             }
@@ -103,6 +107,13 @@ struct ConnectionView: View {
                 .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("完成", systemImage: "xmark") { dismiss() }.labelStyle(.iconOnly).disabled(store.isConnecting) } }
                 .interactiveDismissDisabled(store.isConnecting)
                 .autocorrectionDisabled()
+                .task {
+                    guard let profile = store.activeProfile, address.isEmpty else { return }
+                    name = profile.name
+                    address = profile.address.absoluteString
+                    username = profile.username
+                    focus = .password
+                }
         }
     }
     private func input<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
